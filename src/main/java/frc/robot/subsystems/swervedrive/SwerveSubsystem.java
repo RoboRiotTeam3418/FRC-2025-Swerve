@@ -17,6 +17,9 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
+import com.revrobotics.spark.SparkAnalogSensor;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
@@ -30,6 +33,7 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -62,7 +66,7 @@ public class SwerveSubsystem extends SubsystemBase
   /**
    * Swerve drive object.
    */
-  private final SwerveDrive         swerveDrive;
+  public final SwerveDrive         swerveDrive;
   /**
    * AprilTag field layout.
    */
@@ -144,7 +148,16 @@ public class SwerveSubsystem extends SubsystemBase
     if (visionDriveTest)
     {
       swerveDrive.updateOdometry();
-//      vision.updatePoseEstimation(swerveDrive);
+    // vision.updatePoseEstimation(swerveDrive);
+
+    //swerveDrive.drive(new ChassisSpeeds());
+
+    // Display swerve drive angle encoders onto the Smartdashboard
+    // super.periodic();
+    // SmartDashboard.putNumber("flAngle",swerveDrive.getModules()[0].getAbsolutePosition());
+    // SmartDashboard.putNumber("frAngle",swerveDrive.getModules()[1].getAbsolutePosition());
+    // SmartDashboard.putNumber("blAngle",swerveDrive.getModules()[2].getAbsolutePosition());
+    // SmartDashboard.putNumber("brAngle",swerveDrive.getModules()[3].getAbsolutePosition());
     }
   }
 
@@ -443,7 +456,8 @@ public class SwerveSubsystem extends SubsystemBase
                                                                                  translationY.getAsDouble()), 0.8);
 
       // Make the robot move
-      driveFieldOriented(swerveDrive.swerveController.getTargetSpeeds(scaledInputs.getX(), scaledInputs.getY(),
+      driveFieldOriented(swerveDrive.swerveController.getTargetSpeeds(scaledInputs.getX(), 
+                                                                      scaledInputs.getY(),
                                                                       headingX.getAsDouble(),
                                                                       headingY.getAsDouble(),
                                                                       swerveDrive.getOdometryHeading().getRadians(),
@@ -467,10 +481,13 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public void drive(Translation2d translation, double rotation, boolean fieldRelative)
   {
+    fieldRelative = false; //Force robot-relative for testing ********************************MUST CHANGE BACK***********************
     swerveDrive.drive(translation,
                       rotation,
                       fieldRelative,
-                      false); // Open loop is disabled since it shouldn't be used most of the time.
+                      false);// Open loop is disabled since it shouldn't be used most of the time.
+
+  
   }
 
   /**
