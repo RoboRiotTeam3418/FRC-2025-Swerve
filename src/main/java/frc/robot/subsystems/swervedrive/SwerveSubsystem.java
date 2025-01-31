@@ -481,7 +481,7 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public void drive(Translation2d translation, double rotation, boolean fieldRelative)
   {
-    fieldRelative = false; //Force robot-relative for testing ********************************MUST CHANGE BACK***********************
+    //fieldRelative = false; //Force robot-relative for testing ********************************MUST CHANGE BACK***********************
     swerveDrive.drive(translation,
                       rotation,
                       fieldRelative,
