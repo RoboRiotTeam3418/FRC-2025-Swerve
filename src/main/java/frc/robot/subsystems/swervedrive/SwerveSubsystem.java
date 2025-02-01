@@ -150,14 +150,6 @@ public class SwerveSubsystem extends SubsystemBase
       swerveDrive.updateOdometry();
     // vision.updatePoseEstimation(swerveDrive);
 
-    //swerveDrive.drive(new ChassisSpeeds());
-
-    // Display swerve drive angle encoders onto the Smartdashboard
-    // super.periodic();
-    // SmartDashboard.putNumber("flAngle",swerveDrive.getModules()[0].getAbsolutePosition());
-    // SmartDashboard.putNumber("frAngle",swerveDrive.getModules()[1].getAbsolutePosition());
-    // SmartDashboard.putNumber("blAngle",swerveDrive.getModules()[2].getAbsolutePosition());
-    // SmartDashboard.putNumber("brAngle",swerveDrive.getModules()[3].getAbsolutePosition());
     }
   }
 
@@ -203,9 +195,9 @@ public class SwerveSubsystem extends SubsystemBase
           // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
           new PPHolonomicDriveController(
               // PPHolonomicController is the built in path following controller for holonomic drive trains
-              new PIDConstants(5.0, 0.0, 0.0),
+              new PIDConstants(5.2, 0.0, 0.7),
               // Translation PID constants
-              new PIDConstants(5.0, 0.0, 0.0)
+              new PIDConstants(5.2, 0.0, 0.7)
               // Rotation PID constants
           ),
           config,
@@ -267,6 +259,12 @@ public class SwerveSubsystem extends SubsystemBase
    * @param pathName PathPlanner path name.
    * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
    */
+  public Command trueFwd(){
+    return run(
+      ()-> {
+        swerveDrive.drive(new ChassisSpeeds(0.1,1, 0));
+      });
+  }
   public Command getAutonomousCommand(String pathName)
   {
     // Create a path following command using AutoBuilder. This will also trigger event markers.
