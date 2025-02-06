@@ -8,16 +8,22 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
 import swervelib.SwerveInputStream;
 
 /**
@@ -29,8 +35,54 @@ public class RobotContainer
 {
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  final         CommandXboxController driverXbox = new CommandXboxController(0);
+   CommandJoystick m_primaryJoystick = Setup.getInstance().getPrimaryJoystick();
+  public double speed = 0;
   // The robot's subsystems and commands are defined here...
+
+  public Double getXSpeedSetting(){
+    //set the speed based on the current speed setting
+       double sign = 1;
+        //String whichSpeed = speedSetting;
+        if(Setup.getInstance().getDeathMode()){
+                speed =Constants.MAX_SPEED;
+        } else if(Setup.getInstance().getPrimaryDriverXButton()){
+                speed=-0.325;
+        } else if(Setup.getInstance().getPrimaryDriverAButton()){
+                speed=-0.5;
+        } else if(Setup.getInstance().getPrimaryDriverBButton()){
+                speed=-0.825;
+        } else if(Setup.getInstance().getPrimaryDriverYButton()){
+                speed = -.999;
+        }
+        if (m_primaryJoystick.getX()>0.1){
+          sign = -1;
+        }else if(m_primaryJoystick.getX()<0.1){
+          sign = 1;
+        }
+        return speed*sign;
+    }
+    public Double getYSpeedSetting(){
+      //set the speed based on the current speed setting
+         double sign = 1;
+          //String whichSpeed = speedSetting;
+          if(Setup.getInstance().getDeathMode()){
+                  speed =Constants.MAX_SPEED;
+          } else if(Setup.getInstance().getPrimaryDriverXButton()){
+                  speed=-0.325;
+          } else if(Setup.getInstance().getPrimaryDriverAButton()){
+                  speed=-0.5;
+          } else if(Setup.getInstance().getPrimaryDriverBButton()){
+                  speed=-0.825;
+          } else if(Setup.getInstance().getPrimaryDriverYButton()){
+                  speed = -.999;
+          }
+          if (m_primaryJoystick.getY()>0.1){
+            sign = 1;
+          }else if(m_primaryJoystick.getY()<0.1){
+            sign = -1;
+          }
+          return speed*sign;
+      }
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                                 "swerve/neo"));
 
@@ -38,39 +90,37 @@ public class RobotContainer
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> driverXbox.getLeftY() * -1,
-                                                                () -> driverXbox.getLeftX() * -1)
-                                                            .withControllerRotationAxis(driverXbox::getRightX)
+                                                                () -> m_primaryJoystick.getY() + getXSpeedSetting(),// CHECK FUNCTION
+                                                                () -> m_primaryJoystick.getX() + getYSpeedSetting())// CHECK FUNCTION
+                                                            .withControllerRotationAxis(m_primaryJoystick::getTwist)// CHECK FUNCTION
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
                                                             .allianceRelativeControl(true);
 
   /**
-   * Clone's the angular velocity input stream and converts it to a fieldRelative input stream.
+   * Clones the angular velocity input stream and converts it to a fieldRelative input stream.
    */
-  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(driverXbox::getRightX,
-                                                                                             driverXbox::getRightY)
+  public DoubleSupplier getNegTwist = ()-> m_primaryJoystick.getTwist()*-1;
+  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(m_primaryJoystick::getTwist, getNegTwist)//checkfunction
                                                            .headingWhile(true);
 
-
   SwerveInputStream driveAngularVelocitySim = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                   () -> -driverXbox.getLeftY(),
-                                                                   () -> -driverXbox.getLeftX())
-                                                               .withControllerRotationAxis(() -> driverXbox.getRawAxis(2))
+                                                                   () -> -m_primaryJoystick.getY(),
+                                                                   () -> -m_primaryJoystick.getX())
+                                                               .withControllerRotationAxis(() -> m_primaryJoystick.getRawAxis(2))
                                                                .deadband(OperatorConstants.DEADBAND)
                                                                .scaleTranslation(0.8)
                                                                .allianceRelativeControl(true);
   // Derive the heading axis with math!
   SwerveInputStream driveDirectAngleSim     = driveAngularVelocitySim.copy()
                                                                      .withControllerHeadingAxis(() -> Math.sin(
-                                                                                                    driverXbox.getRawAxis(
+                                                                                                    m_primaryJoystick.getRawAxis(
                                                                                                         2) * Math.PI) * (Math.PI * 2),
                                                                                                 () -> Math.cos(
-                                                                                                    driverXbox.getRawAxis(
+                                                                                                    m_primaryJoystick.getRawAxis(
                                                                                                         2) * Math.PI) *
                                                                                                       (Math.PI * 2))
                                                                      .headingWhile(true);
-
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -99,6 +149,32 @@ public class RobotContainer
     Command driveFieldOrientedAnglularVelocitySim = drivebase.driveFieldOriented(driveAngularVelocitySim);
     Command driveSetpointGenSim = drivebase.driveWithSetpointGeneratorFieldRelative(
         driveDirectAngleSim);
+    final Supplier<ChassisSpeeds> DEATH_SPEEDS = () -> new ChassisSpeeds(0,0, drivebase.getSwerveDrive().getMaximumChassisAngularVelocity());
+    Command death = drivebase.drive(DEATH_SPEEDS);
+
+    //create triggers for primary buttons
+    BooleanSupplier fullStop = () ->Setup.getInstance().getFullStop(); 
+    Trigger fullStopTrig = new Trigger(fullStop);
+    BooleanSupplier zeroGyro = () ->Setup.getInstance().getZeroGyro(); 
+    Trigger zeroGyroTrig = new Trigger(zeroGyro);
+    BooleanSupplier primaryStart = () ->Setup.getInstance().getPrimaryStart(); 
+    Trigger primaryStartTrig = new Trigger(primaryStart);
+    BooleanSupplier primaryBack = () ->Setup.getInstance().getPrimaryBack(); 
+    Trigger primaryBackTrig = new Trigger(primaryBack);
+    BooleanSupplier backIsPos = () ->Setup.getInstance().getBackIsPos();
+    Trigger backIsPosTrig = new Trigger(backIsPos);
+    BooleanSupplier backIsNeg = () ->Setup.getInstance().getBackIsNeg();
+    Trigger backIsNegTrig = new Trigger(backIsNeg);
+    BooleanSupplier driveSetDistance = () ->Setup.getInstance().getDriveSetDistance();
+    Trigger driveSetDistanceTrig = new Trigger(driveSetDistance);
+    BooleanSupplier fakeVision = () ->Setup.getInstance().getFakeVision();
+    Trigger fakeVisionTrig = new Trigger(fakeVision);
+    BooleanSupplier deathMode = () -> Setup.getInstance().getDeathMode();
+    Trigger deathModeTrig = new Trigger(deathMode);
+
+    //m_secondary.leftBumper().whileTrue(m_endeff.spinCounterClockwise());
+    //m_secondary.rightBumper().whileTrue(m_endeff.spinClockwise());
+    //m_secondary.b().onTrue(m_endeff.to35());
 
     if (RobotBase.isSimulation())
     {
@@ -110,33 +186,36 @@ public class RobotContainer
 
     if (Robot.isSimulation())
     {
-      driverXbox.start().onTrue(Commands.runOnce(() -> drivebase.resetOdometry(new Pose2d(3, 3, new Rotation2d()))));
-      driverXbox.button(1).whileTrue(drivebase.sysIdDriveMotorCommand());
+     primaryStartTrig.onTrue(Commands.runOnce(() -> drivebase.resetOdometry(new Pose2d(3, 3, new Rotation2d()))));
+      m_primaryJoystick.button(1).whileTrue(drivebase.sysIdDriveMotorCommand());
 
     }
     if (DriverStation.isTest())
     {
       drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity); // Overrides drive command above!
 
-      driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-      driverXbox.y().whileTrue(drivebase.driveToDistanceCommand(1.0, 0.2));
-      driverXbox.start().onTrue((Commands.runOnce(drivebase::zeroGyro)));
-      driverXbox.back().whileTrue(drivebase.centerModulesCommand());
-      driverXbox.leftBumper().onTrue(Commands.none());
-      driverXbox.rightBumper().onTrue(Commands.none());
+      fullStopTrig.whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      driveSetDistanceTrig.whileTrue(drivebase.driveToDistanceCommand(1.0, 0.2));
+      zeroGyroTrig.onTrue((Commands.runOnce(drivebase::zeroGyro)));
+      primaryBackTrig.whileTrue(drivebase.centerModulesCommand());
+      backIsNegTrig.onTrue(Commands.none());
+      backIsPosTrig.onTrue(Commands.none());
     } else
     {
-      driverXbox.a().whileTrue(drivebase.trueFwd());
-      driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
-      driverXbox.b().whileTrue(
+      zeroGyroTrig.onTrue((Commands.runOnce(drivebase::zeroGyro)));
+      fakeVisionTrig.onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
+      driveSetDistanceTrig.whileTrue(
           drivebase.driveToPose(
               new Pose2d(new Translation2d(4, 4), Rotation2d.fromDegrees(0)))
                               );
-      driverXbox.start().whileTrue(Commands.none());
-      driverXbox.back().whileTrue(Commands.none());
-      driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-      driverXbox.rightBumper().onTrue(Commands.none());
+      primaryStartTrig.whileTrue(Commands.none());
+      primaryBackTrig.whileTrue(Commands.none());
+      backIsNegTrig.whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      backIsPosTrig.onTrue(Commands.none());
+      deathModeTrig.whileTrue(death);
+
     }
+    deathModeTrig.whileTrue(death);
 
   }
 
