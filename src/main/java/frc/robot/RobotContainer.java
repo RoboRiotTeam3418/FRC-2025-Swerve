@@ -41,45 +41,50 @@ public class RobotContainer
 
   public Double getXSpeedSetting(){
     //set the speed based on the current speed setting
-       double sign = 1;
+       double sign;
         //String whichSpeed = speedSetting;
         if(Setup.getInstance().getDeathMode()){
                 speed =Constants.MAX_SPEED;
         } else if(Setup.getInstance().getPrimaryDriverXButton()){
-                speed=-0.325;
+                speed=0.325;
         } else if(Setup.getInstance().getPrimaryDriverAButton()){
-                speed=-0.5;
+                speed=0.5;
         } else if(Setup.getInstance().getPrimaryDriverBButton()){
-                speed=-0.825;
+                speed=0.825;
         } else if(Setup.getInstance().getPrimaryDriverYButton()){
-                speed = -.999;
-        }
+                speed = .999;
+        } 
         if (m_primaryJoystick.getX()>0.1){
           sign = -1;
-        }else if(m_primaryJoystick.getX()<0.1){
+        }else if(m_primaryJoystick.getX()<-0.1){
           sign = 1;
+        }else{
+          sign = 0;
         }
         return speed*sign;
     }
     public Double getYSpeedSetting(){
       //set the speed based on the current speed setting
-         double sign = 1;
+         double sign;
           //String whichSpeed = speedSetting;
           if(Setup.getInstance().getDeathMode()){
                   speed =Constants.MAX_SPEED;
           } else if(Setup.getInstance().getPrimaryDriverXButton()){
-                  speed=-0.325;
+            //xtra Slow
+                  speed=0.325;
           } else if(Setup.getInstance().getPrimaryDriverAButton()){
-                  speed=-0.5;
+                  speed=0.5;
           } else if(Setup.getInstance().getPrimaryDriverBButton()){
-                  speed=-0.825;
+                  speed=0.825;
           } else if(Setup.getInstance().getPrimaryDriverYButton()){
-                  speed = -.999;
+                  speed = .999;
           }
           if (m_primaryJoystick.getY()>0.1){
             sign = 1;
-          }else if(m_primaryJoystick.getY()<0.1){
+          }else if(m_primaryJoystick.getY()<-0.1){
             sign = -1;
+          }else{
+            sign = 0;
           }
           return speed*sign;
       }
