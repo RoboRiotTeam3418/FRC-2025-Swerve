@@ -37,33 +37,26 @@ public class RobotContainer
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
    CommandJoystick m_primaryJoystick = Setup.getInstance().getPrimaryJoystick();
-  public double speed = 0,xtraslowspeed = 0.90, slowspeed = 0.75, medspeed = 0.5, fastspeed = 0.20;
-  // The robot's subsystems and commands are defined here...
 
+  /*
+   * Gets factor to reduce speed by
+   */
+  public double speed = 0,xtraslowspeed = 0.90, slowspeed = 0.75, medspeed = 0.5, fastspeed = 0.20;
   public Double getSpeedSetting(double joyInput){
     //set the speed based on the current speed setting
-       double sign;
         //String whichSpeed = speedSetting;
         if(Setup.getInstance().getDeathMode()){
            speed =Constants.MAX_SPEED;
         } else if(Setup.getInstance().getPrimaryDriverXButton()&& Deadbands.isGreater(joyInput,xtraslowspeed)){
-          //xtra Slow
-                speed= xtraslowspeed;
+                speed = xtraslowspeed;
         } else if(Setup.getInstance().getPrimaryDriverAButton()&&Deadbands.isGreater(joyInput,slowspeed)){
-                speed=slowspeed;
+                speed = slowspeed;
         } else if(Setup.getInstance().getPrimaryDriverBButton()&&Deadbands.isGreater(joyInput,medspeed)){
-                speed=medspeed;
+                speed = medspeed;
         } else if(Setup.getInstance().getPrimaryDriverYButton()&&Deadbands.isGreater(joyInput,fastspeed)){
                 speed = fastspeed;
         }
-        if (m_primaryJoystick.getX()>0.1){
-          sign = 1;
-        }else if(m_primaryJoystick.getX()<-0.1){
-          sign = -1;
-        }else{
-          sign = 0;
-        }
-        return speed*sign;
+        return speed*Math.signum(joyInput);
     }
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                                 "swerve/neo"));
