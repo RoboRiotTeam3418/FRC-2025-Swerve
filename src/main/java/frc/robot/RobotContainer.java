@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+import frc.robot.util.math.*;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
@@ -39,20 +40,20 @@ public class RobotContainer
   public double speed = 0,xtraslowspeed = 0.90, slowspeed = 0.75, medspeed = 0.5, fastspeed = 0.20;
   // The robot's subsystems and commands are defined here...
 
-  public Double getXSpeedSetting(){
+  public Double getSpeedSetting(double joyInput){
     //set the speed based on the current speed setting
        double sign;
         //String whichSpeed = speedSetting;
         if(Setup.getInstance().getDeathMode()){
            speed =Constants.MAX_SPEED;
-        } else if(Setup.getInstance().getPrimaryDriverXButton()&&(m_primaryJoystick.getX()>xtraslowspeed||m_primaryJoystick.getX()<-xtraslowspeed)){
+        } else if(Setup.getInstance().getPrimaryDriverXButton()&& Deadbands.isGreater(joyInput,xtraslowspeed)){
           //xtra Slow
                 speed= xtraslowspeed;
-        } else if(Setup.getInstance().getPrimaryDriverAButton()&&(m_primaryJoystick.getX()>slowspeed||m_primaryJoystick.getX()<-slowspeed)){
+        } else if(Setup.getInstance().getPrimaryDriverAButton()&&Deadbands.isGreater(joyInput,slowspeed)){
                 speed=slowspeed;
-        } else if(Setup.getInstance().getPrimaryDriverBButton()&&(m_primaryJoystick.getX()>medspeed||m_primaryJoystick.getX()<-medspeed)){
+        } else if(Setup.getInstance().getPrimaryDriverBButton()&&Deadbands.isGreater(joyInput,medspeed)){
                 speed=medspeed;
-        } else if(Setup.getInstance().getPrimaryDriverYButton()&&(m_primaryJoystick.getX()>fastspeed||m_primaryJoystick.getX()<-fastspeed)){
+        } else if(Setup.getInstance().getPrimaryDriverYButton()&&Deadbands.isGreater(joyInput,fastspeed)){
                 speed = fastspeed;
         }
         if (m_primaryJoystick.getX()>0.1){
@@ -64,31 +65,6 @@ public class RobotContainer
         }
         return speed*sign;
     }
-    public Double getYSpeedSetting(){
-      //set the speed based on the current speed setting
-         double sign;
-          //String whichSpeed = speedSetting;
-          if(Setup.getInstance().getDeathMode()){
-                  speed =Constants.MAX_SPEED;
-          } else if(Setup.getInstance().getPrimaryDriverXButton()&&(m_primaryJoystick.getY()>xtraslowspeed||m_primaryJoystick.getY()<-xtraslowspeed)){
-            //xtra Slow
-                  speed= xtraslowspeed;
-          } else if(Setup.getInstance().getPrimaryDriverAButton()&&(m_primaryJoystick.getY()>slowspeed||m_primaryJoystick.getY()<-slowspeed)){
-                  speed=slowspeed;
-          } else if(Setup.getInstance().getPrimaryDriverBButton()&&(m_primaryJoystick.getY()>medspeed||m_primaryJoystick.getY()<-medspeed)){
-                  speed=medspeed;
-          } else if(Setup.getInstance().getPrimaryDriverYButton()&&(m_primaryJoystick.getY()>fastspeed||m_primaryJoystick.getY()<-fastspeed)){
-                  speed = fastspeed;
-          }
-          if (m_primaryJoystick.getY()>0.1){
-            sign = 1;
-          }else if(m_primaryJoystick.getY()<-0.1){
-            sign = -1;
-          }else{
-            sign = 0;
-          }
-          return speed*sign;
-      }
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                                 "swerve/neo"));
 
@@ -96,8 +72,8 @@ public class RobotContainer
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> m_primaryJoystick.getY() - getXSpeedSetting(),// CHECK FUNCTION
-                                                                () -> m_primaryJoystick.getX() - getYSpeedSetting())// CHECK FUNCTION
+                                                                () -> m_primaryJoystick.getY() - getSpeedSetting(m_primaryJoystick.getY()),// CHECK FUNCTION
+                                                                () -> m_primaryJoystick.getX() - getSpeedSetting(m_primaryJoystick.getX()))// CHECK FUNCTION
                                                             .withControllerRotationAxis(m_primaryJoystick::getTwist)// CHECK FUNCTION
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
@@ -177,10 +153,6 @@ public class RobotContainer
     Trigger fakeVisionTrig = new Trigger(fakeVision);
     BooleanSupplier deathMode = () -> Setup.getInstance().getDeathMode();
     Trigger deathModeTrig = new Trigger(deathMode);
-
-    //m_secondary.leftBumper().whileTrue(m_endeff.spinCounterClockwise());
-    //m_secondary.rightBumper().whileTrue(m_endeff.spinClockwise());
-    //m_secondary.b().onTrue(m_endeff.to35());
 
     if (RobotBase.isSimulation())
     {
