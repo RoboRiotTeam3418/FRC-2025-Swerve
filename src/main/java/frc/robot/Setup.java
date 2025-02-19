@@ -73,10 +73,6 @@ public class Setup {
   public double getPrimaryY(){
     return primaryJoystick.getY();
   }
-  
-  public double getPrimaryZ(){
-    return primaryJoystick.getZ();
-  }
 
   //speed
   public boolean getPrimaryDriverXButton(){

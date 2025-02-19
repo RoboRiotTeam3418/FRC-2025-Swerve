@@ -41,7 +41,7 @@ public class RobotContainer
   /*
    * Gets factor to reduce speed by
    */
-  public double speed = 0,xtraslowspeed = 0.90, slowspeed = 0.75, medspeed = 0.5, fastspeed = 0.20;
+  public double speed = 0.5 ,xtraslowspeed = 0.10, slowspeed = 0.25, medspeed = 0.5, fastspeed = 0.80;
   public Double getSpeedSetting(double joyInput){
     //set the speed based on the current speed setting
         //String whichSpeed = speedSetting;
@@ -65,8 +65,8 @@ public class RobotContainer
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> m_primaryJoystick.getY() - getSpeedSetting(m_primaryJoystick.getY()),// CHECK FUNCTION
-                                                                () -> m_primaryJoystick.getX() - getSpeedSetting(m_primaryJoystick.getX()))// CHECK FUNCTION
+                                                                () -> m_primaryJoystick.getY(),// CHECK FUNCTION
+                                                                () -> m_primaryJoystick.getX())// CHECK FUNCTION
                                                             .withControllerRotationAxis(m_primaryJoystick::getTwist)// CHECK FUNCTION
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
