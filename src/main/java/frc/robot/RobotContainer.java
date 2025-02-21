@@ -19,6 +19,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+import java.util.function.DoubleSupplier;
+
 import swervelib.SwerveInputStream;
 
 /**
@@ -32,7 +34,8 @@ public class RobotContainer
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
   //final         CommandJoystick driverJoystick = new CommandJoystick(0);
-  final         CommandXboxController driverXbox = new CommandXboxController(0);
+  final         CommandXboxController driverXbox = new CommandXboxController(1);
+  private static CommandJoystick m_primaryJoystick = new CommandJoystick(0);
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                                 "swerve/neo"));
@@ -41,38 +44,38 @@ public class RobotContainer
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> driverXbox.getLeftY() * -1,
-                                                                () -> driverXbox.getLeftX() * -1)
-                                                            .withControllerRotationAxis(driverXbox::getRightX)
+                                                                () -> m_primaryJoystick.getRawAxis(1),// CHECK FUNCTION
+                                                                () -> m_primaryJoystick.getRawAxis(0))// CHECK FUNCTION
+                                                            .withControllerRotationAxis(()->m_primaryJoystick.getRawAxis(5))// CHECK FUNCTION
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
                                                             .allianceRelativeControl(true);
 
   /**
-   * Clone's the angular velocity input stream and converts it to a fieldRelative input stream.
+   * Clones the angular velocity input stream and converts it to a fieldRelative input stream.
    */
-  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(driverXbox::getRightX,
-                                                                                             driverXbox::getRightY)
+  public DoubleSupplier getNegZ = ()-> m_primaryJoystick.getZ()*-1;
+  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(m_primaryJoystick::getZ, getNegZ)//checkfunction
                                                            .headingWhile(true);
 
-
   SwerveInputStream driveAngularVelocitySim = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                   () -> -driverXbox.getLeftY(),
-                                                                   () -> -driverXbox.getLeftX())
-                                                               .withControllerRotationAxis(() -> driverXbox.getRawAxis(2))
+                                                                   () -> -m_primaryJoystick.getY(),
+                                                                   () -> -m_primaryJoystick.getX())
+                                                               .withControllerRotationAxis(() -> m_primaryJoystick.getRawAxis(2))
                                                                .deadband(OperatorConstants.DEADBAND)
                                                                .scaleTranslation(0.8)
                                                                .allianceRelativeControl(true);
   // Derive the heading axis with math!
   SwerveInputStream driveDirectAngleSim     = driveAngularVelocitySim.copy()
                                                                      .withControllerHeadingAxis(() -> Math.sin(
-                                                                                                    driverXbox.getRawAxis(
+                                                                                                    m_primaryJoystick.getRawAxis(
                                                                                                         2) * Math.PI) * (Math.PI * 2),
                                                                                                 () -> Math.cos(
-                                                                                                    driverXbox.getRawAxis(
+                                                                                                    m_primaryJoystick.getRawAxis(
                                                                                                         2) * Math.PI) *
                                                                                                       (Math.PI * 2))
                                                                      .headingWhile(true);
+
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
