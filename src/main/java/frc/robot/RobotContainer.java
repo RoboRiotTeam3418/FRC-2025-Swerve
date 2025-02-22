@@ -45,27 +45,10 @@ public class RobotContainer {
   CommandJoystick m_primaryJoystick = Setup.getInstance().getPrimaryJoystick();
   //CommandXboxController m_secondary = Setup.getInstance().getSecondaryJoystick();
   //Driver speeds
-  /* 
-  public Double getSpeedSetting(){
-  public String speedSetting = "medium";
-    //determine which speed setting the driver sets
-      if(Setup.getInstance().getDeathMode()){
-              speedSetting = "death";
-      } else if(Setup.getInstance().getPrimaryDriverXButton()){
-              speedSetting = "fast";
-      } else if(Setup.getInstance().getPrimaryDriverAButton()){
-              speedSetting = "medium";
-      } else if(Setup.getInstance().getPrimaryDriverBButton()){
-              speedSetting = "slow";
-      } else if(Setup.getInstance().getPrimaryDriverYButton()){
-              speedSetting = "reallySlow";
-      }*/  
 
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                                 "swerve/neo"));
     // limit acceleration
-    SlewRateLimiter xfilter = new SlewRateLimiter(0.55,-0.9,0);
-    SlewRateLimiter yfilter = new SlewRateLimiter(0.55, -0.9,0);
    /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
@@ -73,7 +56,6 @@ public class RobotContainer {
   /**
    * Clones the angular velocity input stream and converts it to a fieldRelative input stream.
    */
-  public DoubleSupplier getNegTwist = ()-> m_primaryJoystick.getTwist()*-1;
   //SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(m_primaryJoystick::getTwist, getNegTwist)//checkfunction
                                                            //.headingWhile(true);
   /*  Derive the heading axis with math!
@@ -156,27 +138,27 @@ public class RobotContainer {
     Trigger mediumTrig = new Trigger(medium);
     BooleanSupplier fast = () -> Setup.getInstance().getPrimaryDriverYButton();
     Trigger fastTrig = new Trigger(fast);
-        //if (RobotBase.isAutonomous()){
-                //drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-        //}else{
+        /*if (RobotBase.isAutonomous()){
+                drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+        }else{*/
       drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocityMed);
       xtraSlowTrig.onTrue(driveFieldOrientedAnglularVelocityXtraSlow);
       slowTrig.onTrue(driveFieldOrientedAnglularVelocitySlow);
       mediumTrig.onTrue(driveFieldOrientedAnglularVelocityMed);
       fastTrig.onTrue(driveFieldOrientedAnglularVelocityFast);
-       // }
-      zeroGyroTrig.onTrue((Commands.runOnce(drivebase::zeroGyro)));
+       
+      /*zeroGyroTrig.onTrue((Commands.runOnce(drivebase::zeroGyro)));
       fakeVisionTrig.onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
       driveSetDistanceTrig.whileTrue(
           drivebase.driveToPose(
               new Pose2d(new Translation2d(4, 4), Rotation2d.fromDegrees(0)))
                               );
       primaryStartTrig.whileTrue(Commands.none());
-      primaryBackTrig.whileTrue(Commands.none());
+      primaryBackTrig.whileTrue(Commands.none());*/
       //backIsNegTrig.whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       //backIsPosTrig.onTrue(Commands.none());
       //deathModeTrig.whileTrue(death);
-    zeroGyroTrig.onTrue((Commands.runOnce(drivebase::zeroGyro)));
+    //zeroGyroTrig.onTrue((Commands.runOnce(drivebase::zeroGyro)));
     //deathModeTrig.whileTrue(death);
   }
 
