@@ -37,7 +37,7 @@ public final class Constants
 //  }
   public static final class SpeedChangerConstants{
     //first value = speed multipier, second value = slew rate limit
-    public static Double[] xtraSlowSpeeds = {0.35,0.75}, slowSpeeds = {0.5,0.65}, medSpeeds = {0.75,0.6}, fastSpeeds = {0.8,0.55};
+    public static Double[] xtraSlowSpeeds = {0.35,0.75}, slowSpeeds = {0.55,0.65}, medSpeeds = {0.8,0.6}, fastSpeeds = {0.9,0.55};
     public static Double[] get(String param){
       switch (param) {
         case "xtraSlow":

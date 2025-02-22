@@ -70,20 +70,12 @@ public class RobotContainer {
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   //DoubleSupplier rotSupplier = () -> drivebase.getRot(m_primaryJoystick.getTwist());
-  SwerveInputStream driveAngularVelocityAuto = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> xfilter.calculate(m_primaryJoystick.getX()*0.65),// CHECK FUNCTION
-                                                                () -> yfilter.calculate(m_primaryJoystick.getY()*0.65))// CHECK FUNCTION
-                                                            .withControllerRotationAxis(m_primaryJoystick::getTwist)
-                                                            .deadband(OperatorConstants.DEADBAND)
-                                                            //.scaleTranslation(0.8)
-                                                            .allianceRelativeControl(true);                                                                                                        
-
   /**
    * Clones the angular velocity input stream and converts it to a fieldRelative input stream.
    */
   public DoubleSupplier getNegTwist = ()-> m_primaryJoystick.getTwist()*-1;
-  SwerveInputStream driveDirectAngle = driveAngularVelocityAuto.copy().withControllerHeadingAxis(m_primaryJoystick::getTwist, getNegTwist)//checkfunction
-                                                           .headingWhile(true);
+  //SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(m_primaryJoystick::getTwist, getNegTwist)//checkfunction
+                                                           //.headingWhile(true);
   /*  Derive the heading axis with math!
   SwerveInputStream driveDirectAngleSim     = driveAngularVelocity.copy()
                                                                      .withControllerHeadingAxis(() -> Math.sin(
@@ -124,9 +116,12 @@ public class RobotContainer {
     // cancelling on release.
 
 
-    Command driveFieldOrientedDirectAngle         = drivebase.driveFieldOriented(driveDirectAngle);
-    Command driveFieldOrientedAnglularVelocity    = drivebase.driveFieldOriented(driveAngularVelocityAuto);
-    Command driveSetpointGen                      = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
+    //Command driveFieldOrientedDirectAngle         = drivebase.driveFieldOriented(driveDirectAngle);
+    Command driveFieldOrientedAnglularVelocityXtraSlow    = drivebase.driveFieldOriented(drivebase.getAngularVelocity(drivebase,"xtraSlow"));
+    Command driveFieldOrientedAnglularVelocitySlow    = drivebase.driveFieldOriented(drivebase.getAngularVelocity(drivebase,"slow"));
+    Command driveFieldOrientedAnglularVelocityMed    = drivebase.driveFieldOriented(drivebase.getAngularVelocity(drivebase,"medium"));
+    Command driveFieldOrientedAnglularVelocityFast   = drivebase.driveFieldOriented(drivebase.getAngularVelocity(drivebase,"fast"));
+    //Command driveSetpointGen                      = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
     //Command driveFieldOrientedDirectAngleSim      = drivebase.driveFieldOriented(driveDirectAngleSim);
     //Command driveSetpointGenSim = drivebase.driveWithSetpointGeneratorFieldRelative(
         //driveDirectAngleSim);
@@ -164,11 +159,11 @@ public class RobotContainer {
         //if (RobotBase.isAutonomous()){
                 //drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
         //}else{
-      drivebase.setDefaultCommand(new SpeedChanger(drivebase,"medium"));
-      xtraSlowTrig.onTrue(new SpeedChanger(drivebase,"xtraSlow"));
-      slowTrig.onTrue(new SpeedChanger(drivebase,"slow"));
-      mediumTrig.onTrue(new SpeedChanger(drivebase,"medium"));
-      fastTrig.onTrue(new SpeedChanger(drivebase,"fast"));
+      drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocityMed);
+      xtraSlowTrig.onTrue(driveFieldOrientedAnglularVelocityXtraSlow);
+      slowTrig.onTrue(driveFieldOrientedAnglularVelocitySlow);
+      mediumTrig.onTrue(driveFieldOrientedAnglularVelocityMed);
+      fastTrig.onTrue(driveFieldOrientedAnglularVelocityFast);
        // }
       zeroGyroTrig.onTrue((Commands.runOnce(drivebase::zeroGyro)));
       fakeVisionTrig.onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
