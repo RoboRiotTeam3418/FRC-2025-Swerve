@@ -4,6 +4,7 @@
 
 package frc.robot.commands.swervedrive.drivebase;
 import frc.robot.Constants;
+import frc.robot.Setup;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
@@ -34,11 +35,11 @@ public class SpeedChanger extends Command {
    * @param joyInput specific axis value
    * @param XOrY x is true, y is false
    */
-  public SpeedChanger(SwerveSubsystem subsystem,String speed, CommandJoystick primary) {
+  public SpeedChanger(SwerveSubsystem subsystem,String speed) {
     // Use addRequirements() here to declare subsystem dependencies.
     m_speed = speed;
     m_subsystem=subsystem;
-    m_primary = primary;
+    m_primary = Setup.getInstance().getPrimaryJoystick();
     addRequirements(m_subsystem);
 
   }
@@ -51,19 +52,19 @@ public class SpeedChanger extends Command {
     speedKeys.put("slow", Constants.SpeedChangerConstants.slowSpeeds);
     speedKeys.put("medium", Constants.SpeedChangerConstants.medSpeeds);
     speedKeys.put("fast", Constants.SpeedChangerConstants.fastSpeeds);
-    xFilter = new SlewRateLimiter((speedKeys.get(m_speed))[1],-0.9,0);
-    yFilter = new SlewRateLimiter((speedKeys.get(m_speed))[1], -0.9,0);
+    xFilter = new SlewRateLimiter(Constants.SpeedChangerConstants.get(m_speed)[0],-0.9,0);
+    yFilter = new SlewRateLimiter(Constants.SpeedChangerConstants.get(m_speed)[0], -0.9,0);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(m_subsystem.getSwerveDrive(),
-                                                                () -> xFilter.calculate(m_primary.getX()*(speedKeys.get(m_speed))[1]),// CHECK FUNCTION
-                                                                () -> yFilter.calculate(m_primary.getY()*(speedKeys.get(m_speed))[1]))// CHECK FUNCTION
+                                                                () -> m_primary.getX()*Constants.SpeedChangerConstants.get(m_speed)[0],// CHECK FUNCTION
+                                                                () -> m_primary.getY()*Constants.SpeedChangerConstants.get(m_speed)[0])// CHECK FUNCTION
                                                             .withControllerRotationAxis(m_primary::getTwist)
                                                             .deadband(OperatorConstants.DEADBAND)
-                                                            //.scaleTranslation(0.8)
+                                                            .scaleTranslation(0.8)
                                                             .allianceRelativeControl(true);
 
     m_subsystem.driveFieldOriented(driveAngularVelocity);

@@ -59,28 +59,7 @@ public class RobotContainer {
               speedSetting = "slow";
       } else if(Setup.getInstance().getPrimaryDriverYButton()){
               speedSetting = "reallySlow";
-      }*/
-public double speed = 0.5, xtraSlow = 0.35, slow = 0.5, med = 0.75, fast = 0.8;
-  public Double getSpeedSetting(double joyInput){
-  //set the speed based on the current speed setting
-      //String whichSpeed = speedSetting;
-      if(Setup.getInstance().getDeathMode()){
-              speed =Constants.MAX_SPEED;
-      } else if(Setup.getInstance().getPrimaryDriverXButton()){
-              speed=xtraSlow;
-      } else if(Setup.getInstance().getPrimaryDriverAButton()){
-              speed=slow;
-      } else if(Setup.getInstance().getPrimaryDriverBButton()){
-              speed=med;
-      } else if(Setup.getInstance().getPrimaryDriverYButton()){
-              speed = fast;
-      }
-      if (Math.abs(joyInput)>0.1){
-        return speed;
-      }
-      return 0.0;
-  }
-  
+      }*/  
 
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                                 "swerve/neo"));
@@ -185,11 +164,11 @@ public double speed = 0.5, xtraSlow = 0.35, slow = 0.5, med = 0.75, fast = 0.8;
         //if (RobotBase.isAutonomous()){
                 //drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
         //}else{
-      drivebase.setDefaultCommand(new SpeedChanger(drivebase,"medium",m_primaryJoystick));
-      xtraSlowTrig.onTrue(new SpeedChanger(drivebase,"xtraSlow",m_primaryJoystick));
-      slowTrig.onTrue(new SpeedChanger(drivebase,"slow",m_primaryJoystick));
-      mediumTrig.onTrue(new SpeedChanger(drivebase,"medium",m_primaryJoystick));
-      fastTrig.onTrue(new SpeedChanger(drivebase,"fast",m_primaryJoystick));
+      drivebase.setDefaultCommand(new SpeedChanger(drivebase,"medium"));
+      xtraSlowTrig.onTrue(new SpeedChanger(drivebase,"xtraSlow"));
+      slowTrig.onTrue(new SpeedChanger(drivebase,"slow"));
+      mediumTrig.onTrue(new SpeedChanger(drivebase,"medium"));
+      fastTrig.onTrue(new SpeedChanger(drivebase,"fast"));
        // }
       zeroGyroTrig.onTrue((Commands.runOnce(drivebase::zeroGyro)));
       fakeVisionTrig.onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
