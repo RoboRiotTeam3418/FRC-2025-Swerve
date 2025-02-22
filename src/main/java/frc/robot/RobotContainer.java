@@ -6,6 +6,7 @@ package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.*;
+import frc.robot.commands.SpeedChanger;
 import frc.robot.commands.swervedrive.drivebase.*;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
@@ -91,48 +92,19 @@ public double speed = 0.5, xtraSlow = 0.35, slow = 0.5, med = 0.75, fast = 0.8;
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   //DoubleSupplier rotSupplier = () -> drivebase.getRot(m_primaryJoystick.getTwist());
-  SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> m_primaryJoystick.getX(),// CHECK FUNCTION
-                                                                () -> m_primaryJoystick.getY())// CHECK FUNCTION
+  SwerveInputStream driveAngularVelocityAuto = SwerveInputStream.of(drivebase.getSwerveDrive(),
+                                                                () -> xfilter.calculate(m_primaryJoystick.getX()*0.65),// CHECK FUNCTION
+                                                                () -> yfilter.calculate(m_primaryJoystick.getY()*0.65))// CHECK FUNCTION
                                                             .withControllerRotationAxis(m_primaryJoystick::getTwist)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             //.scaleTranslation(0.8)
-                                                            .allianceRelativeControl(true);
-SwerveInputStream driveAngularVelocityXtraSlow = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                            () -> m_primaryJoystick.getX() *xtraSlow,// CHECK FUNCTION
-                                                            () -> m_primaryJoystick.getY() *xtraSlow)// CHECK FUNCTION
-                                                        .withControllerRotationAxis(m_primaryJoystick::getTwist)
-                                                        .deadband(OperatorConstants.DEADBAND)
-                                                        //.scaleTranslation(0.8)
-                                                        .allianceRelativeControl(true);    
-SwerveInputStream driveAngularVelocitySlow = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                        () -> m_primaryJoystick.getX() *slow,// CHECK FUNCTION
-                                                        () -> m_primaryJoystick.getY() *slow)// CHECK FUNCTION
-                                                    .withControllerRotationAxis(m_primaryJoystick::getTwist)
-                                                    .deadband(OperatorConstants.DEADBAND)
-                                                    //.scaleTranslation(0.8)
-                                                    .allianceRelativeControl(true);   
-SwerveInputStream driveAngularVelocityMed = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                        () -> m_primaryJoystick.getX() *med,// CHECK FUNCTION
-                                                        () -> m_primaryJoystick.getY() *med)// CHECK FUNCTION
-                                                    .withControllerRotationAxis(m_primaryJoystick::getTwist)
-                                                    .deadband(OperatorConstants.DEADBAND)
-                                                    //.scaleTranslation(0.8)
-                                                    .allianceRelativeControl(true);   
-SwerveInputStream driveAngularVelocityFast = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                        () -> m_primaryJoystick.getX() *fast,// CHECK FUNCTION
-                                                        () -> m_primaryJoystick.getY() *fast)// CHECK FUNCTION
-                                                    .withControllerRotationAxis(m_primaryJoystick::getTwist)
-                                                    .deadband(OperatorConstants.DEADBAND)
-                                                    //.scaleTranslation(0.8)
-                                                    .allianceRelativeControl(true);   
-                                                                                                        
+                                                            .allianceRelativeControl(true);                                                                                                        
 
   /**
    * Clones the angular velocity input stream and converts it to a fieldRelative input stream.
    */
   public DoubleSupplier getNegTwist = ()-> m_primaryJoystick.getTwist()*-1;
-  SwerveInputStream driveDirectAngle = driveAngularVelocity.copy().withControllerHeadingAxis(m_primaryJoystick::getTwist, getNegTwist)//checkfunction
+  SwerveInputStream driveDirectAngle = driveAngularVelocityAuto.copy().withControllerHeadingAxis(m_primaryJoystick::getTwist, getNegTwist)//checkfunction
                                                            .headingWhile(true);
   /*  Derive the heading axis with math!
   SwerveInputStream driveDirectAngleSim     = driveAngularVelocity.copy()
@@ -175,7 +147,7 @@ SwerveInputStream driveAngularVelocityFast = SwerveInputStream.of(drivebase.getS
 
 
     Command driveFieldOrientedDirectAngle         = drivebase.driveFieldOriented(driveDirectAngle);
-    Command driveFieldOrientedAnglularVelocity    = drivebase.driveFieldOriented(driveAngularVelocity);
+    Command driveFieldOrientedAnglularVelocity    = drivebase.driveFieldOriented(driveAngularVelocityAuto);
     Command driveSetpointGen                      = drivebase.driveWithSetpointGeneratorFieldRelative(driveDirectAngle);
     //Command driveFieldOrientedDirectAngleSim      = drivebase.driveFieldOriented(driveDirectAngleSim);
     //Command driveSetpointGenSim = drivebase.driveWithSetpointGeneratorFieldRelative(
@@ -211,13 +183,15 @@ SwerveInputStream driveAngularVelocityFast = SwerveInputStream.of(drivebase.getS
     Trigger mediumTrig = new Trigger(medium);
     BooleanSupplier fast = () -> Setup.getInstance().getPrimaryDriverYButton();
     Trigger fastTrig = new Trigger(fast);
-
-      drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
-      xtraSlowTrig.onTrue(drivebase.driveFieldOriented(driveAngularVelocityXtraSlow));
-      slowTrig.onTrue(drivebase.driveFieldOriented(driveAngularVelocitySlow));
-      mediumTrig.onTrue(drivebase.driveFieldOriented(driveAngularVelocityMed));
-      fastTrig.onTrue(drivebase.driveFieldOriented(driveAngularVelocityFast));
-
+        //if (RobotBase.isAutonomous()){
+                //drivebase.setDefaultCommand(driveFieldOrientedAnglularVelocity);
+        //}else{
+      drivebase.setDefaultCommand(new SpeedChanger(drivebase,"medium",m_primaryJoystick));
+      xtraSlowTrig.onTrue(new SpeedChanger(drivebase,"xtraSlow",m_primaryJoystick));
+      slowTrig.onTrue(new SpeedChanger(drivebase,"slow",m_primaryJoystick));
+      mediumTrig.onTrue(new SpeedChanger(drivebase,"medium",m_primaryJoystick));
+      fastTrig.onTrue(new SpeedChanger(drivebase,"fast",m_primaryJoystick));
+       // }
       zeroGyroTrig.onTrue((Commands.runOnce(drivebase::zeroGyro)));
       fakeVisionTrig.onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
       driveSetDistanceTrig.whileTrue(
