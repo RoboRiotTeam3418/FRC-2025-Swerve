@@ -2,7 +2,8 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.commands;
+package frc.robot.commands.swervedrive.drivebase;
+import frc.robot.Constants;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
@@ -19,14 +20,10 @@ import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 /** An example command that uses an example subsystem. */
 public class SpeedChanger extends Command {
   @SuppressWarnings({"PMD.UnusedPrivateField", "PMD.SingularField"})
-  public final Dictionary<String, ArrayList<Double>> speedKeys = new Hashtable<>();
+  public final Dictionary<String, Double[]> speedKeys = new Hashtable<>();
   public SwerveSubsystem m_subsystem;
   public String m_speed;
   public CommandJoystick m_primary;
-  public ArrayList<Double> xtraSlowSpeeds = new ArrayList<Double>();
-  public ArrayList<Double> slowSpeeds = new ArrayList<Double>();
-  public ArrayList<Double> medSpeeds = new ArrayList<Double>();
-  public ArrayList<Double> fastSpeeds = new ArrayList<Double>();
   public SlewRateLimiter xFilter;
   SlewRateLimiter yFilter;
 
@@ -49,30 +46,21 @@ public class SpeedChanger extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    //first value = speed multipier, second value = slew rate limit
-    xtraSlowSpeeds.add(0.35);
-    xtraSlowSpeeds.add(0.75);
-    slowSpeeds.add(0.5);
-    slowSpeeds.add(0.65);
-    xtraSlowSpeeds.add(0.75);
-    xtraSlowSpeeds.add(0.6);
-    fastSpeeds.add(0.8);
-    fastSpeeds.add(0.55);
     // Adding key-value pairs
-    speedKeys.put("xtraSlow", xtraSlowSpeeds);
-    speedKeys.put("slow", slowSpeeds);
-    speedKeys.put("medium",medSpeeds);
-    speedKeys.put("fast", fastSpeeds);
-    xFilter = new SlewRateLimiter((speedKeys.get(m_speed)).get(1),-0.9,0);
-    yFilter = new SlewRateLimiter((speedKeys.get(m_speed)).get(1), -0.9,0);
+    speedKeys.put("xtraSlow", Constants.SpeedChangerConstants.xtraSlowSpeeds);
+    speedKeys.put("slow", Constants.SpeedChangerConstants.slowSpeeds);
+    speedKeys.put("medium", Constants.SpeedChangerConstants.medSpeeds);
+    speedKeys.put("fast", Constants.SpeedChangerConstants.fastSpeeds);
+    xFilter = new SlewRateLimiter((speedKeys.get(m_speed))[1],-0.9,0);
+    yFilter = new SlewRateLimiter((speedKeys.get(m_speed))[1], -0.9,0);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     SwerveInputStream driveAngularVelocity = SwerveInputStream.of(m_subsystem.getSwerveDrive(),
-                                                                () -> xFilter.calculate(m_primary.getX()*(speedKeys.get(m_speed)).get(0)),// CHECK FUNCTION
-                                                                () -> yFilter.calculate(m_primary.getY()*(speedKeys.get(m_speed)).get(0)))// CHECK FUNCTION
+                                                                () -> xFilter.calculate(m_primary.getX()*(speedKeys.get(m_speed))[1]),// CHECK FUNCTION
+                                                                () -> yFilter.calculate(m_primary.getY()*(speedKeys.get(m_speed))[1]))// CHECK FUNCTION
                                                             .withControllerRotationAxis(m_primary::getTwist)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             //.scaleTranslation(0.8)
