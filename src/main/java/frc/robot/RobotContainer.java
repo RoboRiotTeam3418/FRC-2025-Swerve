@@ -157,9 +157,14 @@ public class RobotContainer {
       primaryBackTrig.whileTrue(Commands.none());*/
       //backIsNegTrig.whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       //backIsPosTrig.onTrue(Commands.none());
-      //deathModeTrig.whileTrue(death);
     //zeroGyroTrig.onTrue((Commands.runOnce(drivebase::zeroGyro)));
-    //deathModeTrig.whileTrue(death);
+    /* 
+    deathModeTrig.onTrue(Commands.none());
+    deathModeTrig.onFalse(driveFieldOrientedAnglularVelocity);
+    if(deathModeTrig.getAsBoolean()){
+      drivebase.drive(DEATH_SPEEDS.get());
+      
+    }*/
   }
 
   /**
