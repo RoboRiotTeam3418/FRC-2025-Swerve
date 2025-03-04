@@ -452,7 +452,6 @@ public class SwerveSubsystem extends SubsystemBase
 
       Translation2d scaledInputs = SwerveMath.scaleTranslation(new Translation2d(translationX.getAsDouble(),
                                                                                  translationY.getAsDouble()), 0.8);
-
       // Make the robot move
       driveFieldOriented(swerveDrive.swerveController.getTargetSpeeds(scaledInputs.getX(), 
                                                                       scaledInputs.getY(),
