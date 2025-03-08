@@ -9,6 +9,18 @@
           "data": {
             "pathName": "straight to reef left"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "to pickup left"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "return left"
+          }
         }
       ]
     }
