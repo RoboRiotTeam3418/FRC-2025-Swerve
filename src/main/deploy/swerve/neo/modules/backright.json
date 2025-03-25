@@ -19,11 +19,6 @@
     "id": 1,
     "canbus": null
   },
-  "encoder": {
-    "type": "analog",
-    "id": 2,
-    "canbus": null
-  },
   "inverted": {
     "drive": false,
     "angle": false
