@@ -5,9 +5,28 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "New Path"
+            "waitTime": 7.0
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "straight"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "place right"
+                }
+              }
+            ]
           }
         }
       ]
